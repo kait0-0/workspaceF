@@ -37,27 +37,6 @@ def apply_bone_movements(contours, joint_points, new_joint_points, weights):
     new_contours = contours + np.dot(weights, movements)
     return new_contours
 
-# def image_affine(src, dst, src_points, dst_points):
-#     src_rect = cv2.boundingRect(src_points)
-#     dst_rect = cv2.boundingRect(dst_points.astype(np.float32))
-#     src_crop = src[src_rect[1]:src_rect[1] + src_rect[3], src_rect[0]:src_rect[0] + src_rect[2]]
-#     dst_crop = dst[dst_rect[1]:dst_rect[1] + dst_rect[3], dst_rect[0]:dst_rect[0] + dst_rect[2]]
-#
-#     src_pts_crop = src_points - src_rect[:2]
-#     dst_pts_crop = dst_points - dst_rect[:2]
-#     mat = cv2.getAffineTransform(src_pts_crop.astype(np.float32), dst_pts_crop.astype(np.float32))
-#     affine_img = cv2.warpAffine(src_crop, mat, tuple(dst_rect[2:]))
-#
-#     mask = np.zeros_like(dst_crop, dtype=np.uint8)
-#     cv2.fillConvexPoly(mask, dst_pts_crop.astype(np.int32), (1.0, 1.0, 1.0), cv2.LINE_AA)
-#
-#     affine_img = affine_img[:, :, :3]
-#     affine_img = cv2.resize(affine_img, (dst_crop.shape[1], dst_crop.shape[0]))
-#     dst_crop_merge = affine_img * mask + dst_crop * (1 - mask)
-#
-#     dst[dst_rect[1]:dst_rect[1] + dst_rect[3], dst_rect[0]:dst_rect[0] + dst_rect[2]] = dst_crop_merge
-#     return dst
-
 def image_affine(src, dst, src_points, dst_points):
     # src_pointsとdst_pointsのバウンディングボックスを取得
     src_rect = cv2.boundingRect(src_points)
@@ -133,18 +112,7 @@ class Affine_translation:
             pt2 = (int(new_contours[simplex[1]][0]), int(new_contours[simplex[1]][1]))
             pt3 = (int(new_contours[simplex[2]][0]), int(new_contours[simplex[2]][1]))
             canvas = image_affine(self.img, canvas, np.array([self.contours[i] for i in simplex]), np.array([new_contours[i] for i in simplex]))
-            # cv2.line(canvas, pt1, pt2, (0, 255, 0), 1)
-            # cv2.line(canvas, pt2, pt3, (0, 255, 0), 1)
-            # cv2.line(canvas, pt3, pt1, (0, 255, 0), 1)
 
-        # src_points = np.float32([self.joint_points[0], self.joint_points[1], self.joint_points[2]])
-        # dst_points = src_points.copy()
-        # dst_points[0] += [10, 10]  # Move the first point
-        # M = cv2.getAffineTransform(src_points, dst_points)
-        # self.img = cv2.warpAffine(self.img, M, (self.img.shape[1], self.img.shape[0]))
-
-        # cv2.imshow('image', self.img)
-        # cv2.waitKey()
         print(self.img)
         return canvas
 if __name__ == '__main__':
