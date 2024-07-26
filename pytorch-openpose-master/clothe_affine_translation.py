@@ -27,7 +27,7 @@ def calculate_weights(contours, joint_points):
     for i, contour in enumerate(contours):
         for j, joint in enumerate(joint_points):
             distance = np.linalg.norm(contour - joint)
-            weight = 1 / (distance + 1)**20
+            weight = 1 / (distance + 1)
             weights[i, j] = weight
     weights /= np.sum(weights, axis=1)[:, np.newaxis]
     return weights
