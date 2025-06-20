@@ -18,24 +18,30 @@ print(f"Torch device: {torch.cuda.get_device_name()}")
 cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
+print(cap.get(cv2.CAP_PROP_FPS))
 while True:
     ret, oriImg = cap.read()
     candidate, subset = body_estimation(oriImg)
     canvas = copy.deepcopy(oriImg)
 
-    new_joint_points = np.array([candidate[int(subset[0][4])][0:2],
-                                 candidate[int(subset[0][3])][0:2],
-                                 candidate[int(subset[0][2])][0:2],
-                                 candidate[int(subset[0][1])][0:2],
-                                 candidate[int(subset[0][5])][0:2],
-                                 candidate[int(subset[0][6])][0:2],
-                                 candidate[int(subset[0][7])][0:2],
-                                 candidate[int(subset[0][8])][0:2],
-                                 candidate[int(subset[0][11])][0:2],])
-    # アフィン変換を実行
-    affine_translation = clothe_affine_translation.Affine_translation()
-    canvas = affine_translation.affine_translation(new_joint_points, canvas)
-
+    try:
+        if np.any(subset[0][1:9] == -1) or int(subset[0][11]) == -1:
+            continue
+        else:
+            new_joint_points = np.array([candidate[int(subset[0][4])][0:2],
+                                         candidate[int(subset[0][3])][0:2],
+                                         candidate[int(subset[0][2])][0:2],
+                                         candidate[int(subset[0][1])][0:2],
+                                         candidate[int(subset[0][5])][0:2],
+                                         candidate[int(subset[0][6])][0:2],
+                                         candidate[int(subset[0][7])][0:2],
+                                         candidate[int(subset[0][8])][0:2],
+                                         candidate[int(subset[0][11])][0:2],])
+        # アフィン変換を実行
+            affine_translation = clothe_affine_translation.Affine_translation()
+            canvas = affine_translation.affine_translation(new_joint_points, canvas)
+    except IndexError:
+        pass
     cv2.imshow('demo', canvas)#一个窗口用以显示原视频
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

@@ -49,6 +49,7 @@ def image_affine(src, dst, src_points, dst_points):
     # クロップ領域内のポイントを計算
     src_pts_crop = src_points - src_rect[:2]
     dst_pts_crop = dst_points - dst_rect[:2]
+    dst_pts_crop = dst_pts_crop.astype(np.int32)
 
     # アフィン変換行列を取得
     mat = cv2.getAffineTransform(src_pts_crop.astype(np.float32), dst_pts_crop.astype(np.float32))
@@ -58,11 +59,16 @@ def image_affine(src, dst, src_points, dst_points):
 
     # マスクを作成
     mask = np.zeros_like(dst_crop, dtype=np.uint8)
+    print(mask[0].dtype)
     cv2.fillConvexPoly(mask, dst_pts_crop.astype(np.int32), (1, 1, 1), cv2.LINE_AA)
 
     # アフィン変換後の画像をリサイズ
     affine_img = affine_img[:, :, :3]
-    affine_img = cv2.resize(affine_img, (dst_crop.shape[1], dst_crop.shape[0]))
+    if dst_crop.shape[1] > 0 and dst_crop.shape[0] > 0:
+        affine_img = cv2.resize(affine_img, (dst_crop.shape[1], dst_crop.shape[0]))
+    else:
+        return dst
+    # affine_img = cv2.resize(affine_img, (dst_crop.shape[1], dst_crop.shape[0]))
 
     # マスクを適用して画像をマージ
     dst_crop_merge = affine_img * mask + dst_crop * (1 - mask)
@@ -82,6 +88,7 @@ class Affine_translation:
 
         # 0:右手首, 1:右ひじ, 2:右肩, 3:首, 4:左肩, 5:左ひじ, 6:左手首, 7:右腰, 8:左腰
         self.joint_points = np.array([[47, 284], [77, 178], [105, 54], [184, 32], [263, 54], [294, 167], [328, 278], [129, 292], [249, 287]])
+        # self.joint_points = np.array([[55, 397], [89, 257], [127, 134], [236, 98], [344, 131], [387, 243], [425, 396], [148, 367], [332, 368]])
 
         # ボーンの生成
         born = Born(self.joint_points)
